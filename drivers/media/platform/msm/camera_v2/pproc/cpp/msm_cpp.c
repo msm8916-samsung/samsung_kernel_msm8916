@@ -107,6 +107,8 @@ static int msm_cpp_buffer_ops(struct cpp_device *cpp_dev,
 	qcmd;			 \
 })
 
+#define MSM_CPP_MAX_TIMEOUT_TRIAL 3
+
 struct msm_cpp_timer_data_t {
 	struct cpp_device *cpp_dev;
 	struct msm_cpp_frame_info_t *processed_frame;
@@ -175,6 +177,14 @@ static int msm_cpp_enable_debugfs(struct cpp_device *cpp_dev);
 static void msm_cpp_write(u32 data, void __iomem *cpp_base)
 {
 	writel_relaxed((data), cpp_base + MSM_CPP_MICRO_FIFO_RX_DATA);
+}
+
+static void msm_cpp_clear_timer(struct cpp_device *cpp_dev)
+{
+	atomic_set(&cpp_timer.used, 0);
+	del_timer(&cpp_timer.cpp_timer);
+	cpp_timer.data.processed_frame = NULL;
+	cpp_dev->timeout_trial_cnt = 0;
 }
 
 static uint32_t msm_cpp_read(void __iomem *cpp_base)
@@ -620,7 +630,6 @@ void msm_cpp_do_tasklet(unsigned long data)
 	uint32_t tx_fifo[MSM_CPP_TX_FIFO_LEVEL];
 	struct cpp_device *cpp_dev = (struct cpp_device *) data;
 	struct msm_cpp_tasklet_queue_cmd *queue_cmd;
-	struct msm_cpp_timer_t *timer = NULL;
 
 	while (atomic_read(&cpp_dev->irq_cnt)) {
 		spin_lock_irqsave(&cpp_dev->tasklet_lock, flags);
@@ -650,20 +659,14 @@ void msm_cpp_do_tasklet(unsigned long data)
 					CPP_DBG("Frame done!!\n");
 					/* delete CPP timer */
 					CPP_DBG("delete timer.\n");
-					timer = &cpp_timer;
-					atomic_set(&timer->used, 0);
-					del_timer(&timer->cpp_timer);
-					timer->data.processed_frame = NULL;
+					msm_cpp_clear_timer(cpp_dev);
 					msm_cpp_notify_frame_done(cpp_dev);
 				} else if ((msg_id ==
 					MSM_CPP_MSG_ID_FRAME_NACK)
 					&& (atomic_read(&cpp_timer.used))) {
 					pr_err("NACK error from hw!!\n");
 					CPP_DBG("delete timer.\n");
-					timer = &cpp_timer;
-					atomic_set(&timer->used, 0);
-					del_timer(&timer->cpp_timer);
-					timer->data.processed_frame = NULL;
+					msm_cpp_clear_timer(cpp_dev);
 					msm_cpp_notify_frame_done(cpp_dev);
 				}
 				i += cmd_len + 2;
@@ -1109,6 +1112,7 @@ static int cpp_close_node(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh)
 		pr_debug("DEBUG_R1: 0x%x\n",
 			msm_camera_io_r(cpp_dev->cpp_hw_base + 0x8C));
 		msm_camera_io_w(0x0, cpp_dev->base + MSM_CPP_MICRO_CLKEN_CTL);
+		msm_cpp_clear_timer(cpp_dev);
 		cpp_release_hardware(cpp_dev);
 		iommu_detach_device(cpp_dev->domain, cpp_dev->iommu_ctx);
 		cpp_deinit_mem(cpp_dev);
@@ -1242,8 +1246,9 @@ static void msm_cpp_do_timeout_work(struct work_struct *work)
 
 	pr_err("cpp_timer_callback called. (jiffies=%lu)\n",
 		jiffies);
-	if (!work) {
-		pr_err("Invalid work:%pK\n", work);
+	if (!work || cpp_timer.data.cpp_dev->state != CPP_STATE_ACTIVE) {
+		pr_err("Invalid work:%pK or state:%d\n", work,
+			cpp_timer.data.cpp_dev->state);
 		return;
 	}
 	if (!atomic_read(&cpp_timer.used)) {
@@ -1268,6 +1273,14 @@ static void msm_cpp_do_timeout_work(struct work_struct *work)
 		cpp_timer.data.cpp_dev->base +
 		MSM_CPP_MICRO_IRQGEN_CLR);
 
+	if (cpp_timer.data.cpp_dev->timeout_trial_cnt >=
+		MSM_CPP_MAX_TIMEOUT_TRIAL) {
+		pr_info("Max trial reached\n");
+		msm_cpp_notify_frame_done(cpp_timer.data.cpp_dev);
+		cpp_timer.data.cpp_dev->timeout_trial_cnt = 0;
+		return;
+	}
+
 	this_frame = cpp_timer.data.processed_frame;
 	atomic_set(&cpp_timer.used, 1);
 	pr_err("Starting timer to fire in %d ms. (jiffies=%lu)\n",
@@ -1284,6 +1297,7 @@ static void msm_cpp_do_timeout_work(struct work_struct *work)
 	for (i = 0; i < this_frame->msg_len; i++)
 		msm_cpp_write(this_frame->cpp_cmd_msg[i],
 			cpp_timer.data.cpp_dev->base);
+	cpp_timer.data.cpp_dev->timeout_trial_cnt++;
 	return;
 }
 
@@ -1523,16 +1537,7 @@ static int msm_cpp_cfg_frame(struct cpp_device *cpp_dev,
 		stripe_base = STRIPE_BASE_FW_1_6_0;
 	} else {
 		pr_err("invalid fw version %08x", cpp_dev->fw_version);
-<<<<<<< HEAD
-		//goto ERROR3;
-	}
-	if ((stripe_base + num_stripes*27 + 1) != new_frame->msg_len) {
-		pr_err("Invalid frame message\n");
-		rc = -EINVAL;
-		goto ERROR3;
-=======
 		goto phyaddr_err;
->>>>>>> 150a5a83ade (msm: camera: Add compat ioctl changes for cpp)
 	}
 
 	if ((stripe_base + num_stripes*27 + 1) != new_frame->msg_len) {
@@ -1605,6 +1610,26 @@ static int msm_cpp_cfg(struct cpp_device *cpp_dev,
 		pr_err("error cannot copy error\n");
 
 	return rc;
+}
+
+void msm_cpp_clean_queue(struct cpp_device *cpp_dev)
+{
+	struct msm_queue_cmd *frame_qcmd = NULL;
+	struct msm_cpp_frame_info_t *processed_frame = NULL;
+	struct msm_device_queue *queue = NULL;
+
+	while (cpp_dev->processing_q.len) {
+		pr_info("queue len:%d\n", cpp_dev->processing_q.len);
+		queue = &cpp_dev->processing_q;
+		frame_qcmd = msm_dequeue(queue, list_frame);
+		if (frame_qcmd) {
+			processed_frame = frame_qcmd->command;
+			kfree(frame_qcmd);
+			if (processed_frame)
+				kfree(processed_frame->cpp_cmd_msg);
+			kfree(processed_frame);
+		}
+	}
 }
 
 #ifdef CONFIG_COMPAT
@@ -1807,6 +1832,11 @@ long msm_cpp_subdev_ioctl(struct v4l2_subdev *sd,
 
 		kfree(k_stream_buff_info.buffer_info);
 		kfree(u_stream_buff_info);
+		if (cpp_dev->stream_cnt == 0) {
+			cpp_dev->state = CPP_STATE_ACTIVE;
+			msm_cpp_clear_timer(cpp_dev);
+			msm_cpp_clean_queue(cpp_dev);
+		}
 
 		if (buff_queue_info == NULL) {
 			cpp_dev->stream_cnt++;
@@ -1819,7 +1849,8 @@ long msm_cpp_subdev_ioctl(struct v4l2_subdev *sd,
 		struct msm_cpp_buff_queue_info_t *buff_queue_info;
 		CPP_DBG("VIDIOC_MSM_CPP_DEQUEUE_STREAM_BUFF_INFO\n");
 
-		if (ioctl_ptr->len != sizeof(uint32_t))
+		if ((ioctl_ptr->len == 0) ||
+			(ioctl_ptr->len > sizeof(uint32_t)))
 			return -EINVAL;
 
 		rc = msm_cpp_copy_from_ioctl_ptr(&identity, ioctl_ptr);
@@ -1844,11 +1875,14 @@ long msm_cpp_subdev_ioctl(struct v4l2_subdev *sd,
 			buff_queue_info->stream_id);
 		if (cpp_dev->stream_cnt > 0) {
 			cpp_dev->stream_cnt--;
-			pr_err("stream_cnt:%d\n", cpp_dev->stream_cnt);
+			pr_info("stream_cnt:%d\n", cpp_dev->stream_cnt);
 			if (cpp_dev->stream_cnt == 0) {
 				rc = msm_isp_update_bandwidth(ISP_CPP, 0, 0);
 				if (rc < 0)
 					pr_err("Bandwidth Reset Failed!\n");
+				cpp_dev->state = CPP_STATE_IDLE;
+				msm_cpp_clear_timer(cpp_dev);
+				msm_cpp_clean_queue(cpp_dev);
 			}
 		} else {
 			pr_err("error: stream count underflow %d\n",
@@ -1935,6 +1969,12 @@ long msm_cpp_subdev_ioctl(struct v4l2_subdev *sd,
 	case MSM_SD_SHUTDOWN:
 		CPP_DBG("MSM_SD_SHUTDOWN\n");
 		mutex_unlock(&cpp_dev->mutex);
+		pr_info("shutdown cpp node. open cnt:%d\n",
+			cpp_dev->cpp_open_cnt);
+
+		if (atomic_read(&cpp_timer.used))
+			pr_info("Timer state not cleared\n");
+
 		while (cpp_dev->cpp_open_cnt != 0)
 			cpp_close_node(sd, NULL);
 		mutex_lock(&cpp_dev->mutex);
