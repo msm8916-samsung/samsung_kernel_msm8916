@@ -73,6 +73,7 @@ struct v4l2_subdev_info {
 	uint16_t order;
 };
 
+#ifdef CONFIG_COMPAT
 struct msm_camera_gpio_num_info {
 	uint16_t gpio_num[SENSOR_GPIO_MAX];
 	uint8_t valid[SENSOR_GPIO_MAX];
@@ -94,7 +95,7 @@ struct msm_camera_gpio_conf {
 	uint8_t camera_on_table_size;
 	struct msm_camera_gpio_num_info *gpio_num_info;
 };
-
+#endif
 struct msm_camera_power_ctrl_t {
 	struct device *dev;
 	struct msm_sensor_power_setting *power_setting;
@@ -110,6 +111,38 @@ struct msm_camera_power_ctrl_t {
 	uint8_t cam_pinctrl_status;
 	uint16_t clk_info_size;
 };
+#ifdef CONFIG_COMPAT
+enum msm_camera_actuator_name {
+	MSM_ACTUATOR_MAIN_CAM_0,
+	MSM_ACTUATOR_MAIN_CAM_1,
+	MSM_ACTUATOR_MAIN_CAM_2,
+	MSM_ACTUATOR_MAIN_CAM_3,
+	MSM_ACTUATOR_MAIN_CAM_4,
+	MSM_ACTUATOR_MAIN_CAM_5,
+	MSM_ACTUATOR_WEB_CAM_0,
+	MSM_ACTUATOR_WEB_CAM_1,
+	MSM_ACTUATOR_WEB_CAM_2,
+};
+
+struct msm_actuator_info {
+	struct i2c_board_info const *board_info;
+	enum msm_camera_actuator_name cam_name;
+	int bus_id;
+	int vcm_pwd;
+	int vcm_enable;
+};
+enum msm_camera_i2c_mux_mode {
+	MODE_R,
+	MODE_L,
+	MODE_DUAL
+};
+
+struct msm_camera_i2c_conf {
+	uint8_t use_i2c_mux;
+	struct platform_device *mux_dev;
+	enum msm_camera_i2c_mux_mode i2c_mux_mode;
+};
+#endif
 
 enum msm_camera_actuator_name {
 	MSM_ACTUATOR_MAIN_CAM_0,
