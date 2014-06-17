@@ -55,6 +55,7 @@
 #define MAX_NUMBER_OF_STEPS 47
 
 #define MAX_LED_TRIGGERS        3
+#define MAX_POWER_CONFIG 12
 #define MSM_OIS_VER_SIZE       (6)
 
 
