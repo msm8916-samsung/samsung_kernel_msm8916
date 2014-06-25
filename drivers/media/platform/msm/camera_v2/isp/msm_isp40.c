@@ -65,8 +65,8 @@ static uint8_t stats_pingpong_offset_map[] = {
 	(~(ping_pong >> (stats_pingpong_offset_map[idx])) & 0x1))
 
 #define VFE40_VBIF_CLKON                    0x4
-#define VFE40_VBIF_FIXED_SORT_EN            0x30
-#define VFE40_VBIF_FIXED_SORT_SEL0          0x34
+//#define VFE40_VBIF_FIXED_SORT_EN            0x30
+//#define VFE40_VBIF_FIXED_SORT_SEL0          0x34
 #define VFE40_VBIF_IN_RD_LIM_CONF0          0xB0
 #define VFE40_VBIF_IN_RD_LIM_CONF1          0xB4
 #define VFE40_VBIF_IN_RD_LIM_CONF2          0xB8
@@ -144,7 +144,7 @@ static void msm_vfe40_init_qos_parms(struct vfe_device *vfe_dev)
 	}
 }
 
-static void msm_vfe40_init_vbif_parms_8974_v1(struct vfe_device *vfe_dev)
+/*static void msm_vfe40_init_vbif_parms_8974_v1(struct vfe_device *vfe_dev)
 {
 	void __iomem *vfe_vbif_base = vfe_dev->vfe_vbif_base;
 	msm_camera_io_w(0x1,
@@ -248,7 +248,7 @@ static void msm_vfe40_init_vbif_parms_8x26(struct vfe_device *vfe_dev)
 	msm_camera_io_w(0x22222222,
 		vfe_vbif_base + VFE40_VBIF_OUT_AXI_AMEMTYPE_CONF0);
 	return;
-}
+}*/
 
 static void msm_vfe40_init_vbif_parms_8939(struct vfe_device *vfe_dev)
 {
@@ -388,8 +388,8 @@ static void msm_vfe40_init_hardware_reg(struct vfe_device *vfe_dev)
 {
 	uint32_t irq_mask;
 	irq_mask = msm_camera_io_r(vfe_dev->vfe_base + 0x28);
-	msm_vfe40_init_qos_parms(vfe_dev);
-	msm_vfe40_init_vbif_parms(vfe_dev);
+	//msm_vfe40_init_qos_parms(vfe_dev);
+	//msm_vfe40_init_vbif_parms(vfe_dev);
 	/* CGC_OVERRIDE */
 	msm_camera_io_w(0x3FFFFFFF, vfe_dev->vfe_base + 0x14);
 	msm_camera_io_w(0xC001FF7F, vfe_dev->vfe_base + 0x974);
