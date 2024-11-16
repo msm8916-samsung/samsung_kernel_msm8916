@@ -454,10 +454,8 @@ struct msm_sensor_power_setting {
 };
 
 struct msm_sensor_power_setting_array {
-	struct msm_sensor_power_setting  power_setting_a[MAX_POWER_CONFIG];
 	struct msm_sensor_power_setting *power_setting;
 	uint16_t size;
-	struct msm_sensor_power_setting  power_down_setting_a[MAX_POWER_CONFIG];
 	struct msm_sensor_power_setting *power_down_setting;
 	uint16_t size_down;
 };
@@ -560,7 +558,6 @@ struct msm_camera_csid_vc_cfg {
 
 struct msm_camera_csid_lut_params {
 	uint8_t num_cid;
-	struct msm_camera_csid_vc_cfg vc_cfg_a[MAX_CID];
 	struct msm_camera_csid_vc_cfg *vc_cfg[MAX_CID];
 };
 
@@ -753,11 +750,8 @@ struct msm_sensor_power_setting32 {
 };
 
 struct msm_sensor_power_setting_array32 {
-	struct msm_sensor_power_setting32 power_setting_a[MAX_POWER_CONFIG];
 	compat_uptr_t power_setting;
 	uint16_t size;
-	struct msm_sensor_power_setting32
-		power_down_setting_a[MAX_POWER_CONFIG];
 	compat_uptr_t power_down_setting;
 	uint16_t size_down;
 };
@@ -782,7 +776,6 @@ struct msm_camera_sensor_slave_info32 {
 
 struct msm_camera_csid_lut_params32 {
 	uint8_t num_cid;
-	struct msm_camera_csid_vc_cfg vc_cfg_a[MAX_CID];
 	compat_uptr_t vc_cfg[MAX_CID];
 };
 
