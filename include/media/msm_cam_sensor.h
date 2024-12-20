@@ -470,12 +470,15 @@ struct msm_camera_sensor_slave_info32 {
 	uint16_t slave_addr;
 	enum i2c_freq_mode_t i2c_freq_mode;
 	enum msm_camera_i2c_reg_addr_type addr_type;
+	enum msm_camera_i2c_data_type data_type;
 	struct msm_sensor_id_info_t sensor_id_info;
 	struct msm_sensor_power_setting_array32 power_setting_array;
 	uint8_t  is_init_params_valid;
 	struct msm_sensor_init_params sensor_init_params;
-	uint8_t is_flash_supported;
 	enum msm_sensor_output_format_t output_format;
+	uint8_t is_probe_succeed;
+	char subdev_name[32];
+	struct msm_sensor_info_t sensor_info;
 };
 
 struct msm_camera_csid_lut_params32 {
@@ -487,7 +490,6 @@ struct msm_camera_csid_params32 {
 	uint8_t lane_cnt;
 	uint16_t lane_assign;
 	uint8_t phy_sel;
-	uint32_t csi_clk;
 	struct msm_camera_csid_lut_params32 lut_params;
 };
 
@@ -816,6 +818,7 @@ struct msm_actuator_move_params_t32 {
 
 struct msm_actuator_cfg_data32 {
 	int cfgtype;
+	int sw_landing_type;
 	uint8_t is_af_supported;
 	union {
 		struct msm_actuator_move_params_t32 move;
@@ -836,6 +839,7 @@ struct csiphy_cfg_data32 {
 
 struct sensorb_cfg_data32 {
 	int cfgtype;
+	int flicker_type;
 	union {
 		struct msm_sensor_info_t      sensor_info;
 		struct msm_sensor_init_params sensor_init_params;
