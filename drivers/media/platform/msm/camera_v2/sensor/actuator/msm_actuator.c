@@ -1326,6 +1326,7 @@ static long msm_actuator_subdev_do_ioctl(
 			actuator_data.is_af_supported = u32->is_af_supported;
 			memcpy(&actuator_data.cfg.setpos, &(u32->cfg.setpos),
 				sizeof(struct msm_actuator_set_position_t));
+			parg = &actuator_data;
 			break;
 		default:
 			actuator_data.cfgtype = u32->cfgtype;
