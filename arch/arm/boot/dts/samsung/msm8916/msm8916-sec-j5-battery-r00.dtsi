@@ -82,9 +82,26 @@
 		battery,charging_reset_time = <0>;
 		qcom,sec-battery-vadc = <&pm8916_vadc>;
 
-		battery,swelling_drop_float_voltage = <4200>;
-		battery,swelling_high_rechg_voltage = <4150>;
-		battery,swelling_low_rechg_voltage = <4050>;
+		battery,standard_curr = <1055>;
+		battery,expired_time = <15900>;  /* 185min + 80min */
+		battery,recharging_expired_time = <5400>;
+
+		battery,swelling_high_temp_block = <410>;
+		battery,swelling_high_temp_recov = <390>;
+		battery,swelling_low_temp_block_1st = <150>;
+		battery,swelling_low_temp_recov_1st = <200>;
+		battery,swelling_low_temp_block_2nd = <50>;
+		battery,swelling_low_temp_recov_2nd = <100>;
+
+		battery,swelling_low_temp_current = <750>;	/* 0.3C */
+		battery,swelling_low_temp_topoff = <150>;	/* 0.05C */
+		battery,swelling_high_temp_current = <1250>;	/* 0.45C */
+		battery,swelling_high_temp_topoff = <150>;	/* 0.05C */
+
+		battery,swelling_drop_float_voltage = <4120>;
+		battery,swelling_high_rechg_voltage = <3970>;
+		battery,swelling_low_rechg_voltage = <3970>;
+		battery,chg_float_voltage = <4260>;
 
 		charger{
 			status = "disable";
