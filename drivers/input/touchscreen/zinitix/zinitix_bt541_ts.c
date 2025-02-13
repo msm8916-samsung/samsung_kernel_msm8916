@@ -2999,8 +2999,7 @@ static void fw_update(void *device_data)
 		snprintf(fw_path, MAX_FW_PATH, "/sdcard/%s", TSP_FW_FILENAME);
 		fp = filp_open(fw_path, O_RDONLY, 0);
 		if (IS_ERR(fp)) {
-			dev_err(&client->dev,
-				"file %s open error:%d\n", fw_path, (s32)fp);
+			dev_err(&client->dev, "file %s open error\n", fw_path);
 			info->factory_info->cmd_state = 3;
 			goto err_open;
 		}
@@ -3090,8 +3089,7 @@ static void get_fw_ver_bin(void *device_data)
 			strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
 	finfo->cmd_state = OK;
 
-	dev_info(&client->dev, "%s: %s(%d)\n", __func__, finfo->cmd_buff,
-		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
+	dev_info(&client->dev, "%s: %s\n", __func__, finfo->cmd_buff);
 
 	return;
 }
@@ -3117,8 +3115,7 @@ static void get_fw_ver_ic(void *device_data)
 		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
 	finfo->cmd_state = OK;
 
-	dev_info(&client->dev, "%s: %s(%d)\n", __func__, finfo->cmd_buff,
-		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
+	dev_info(&client->dev, "%s: %s\n", __func__, finfo->cmd_buff);
 
 	return;
 }
@@ -3137,8 +3134,7 @@ static void get_threshold(void *device_data)
 		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
 	finfo->cmd_state = OK;
 
-	dev_info(&client->dev, "%s: %s(%d)\n", __func__, finfo->cmd_buff,
-		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
+	dev_info(&client->dev, "%s: %s\n", __func__, finfo->cmd_buff);
 
 	return;
 }
@@ -3213,8 +3209,7 @@ static void get_chip_vendor(void *device_data)
 		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
 	finfo->cmd_state = OK;
 
-	dev_info(&client->dev, "%s: %s(%d)\n", __func__, finfo->cmd_buff,
-		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
+	dev_info(&client->dev, "%s: %s\n", __func__, finfo->cmd_buff);
 
 	return;
 }
@@ -3232,8 +3227,7 @@ static void get_config_ver(void *device_data)
 		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
 	finfo->cmd_state = OK;
 
-	dev_info(&client->dev, "%s: %s(%d)\n", __func__, finfo->cmd_buff,
-		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
+	dev_info(&client->dev, "%s: %s\n", __func__, finfo->cmd_buff);
 
 	return;
 }
@@ -3253,8 +3247,7 @@ static void get_chip_name(void *device_data)
 		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
 	finfo->cmd_state = OK;
 
-	dev_info(&client->dev, "%s: %s(%d)\n", __func__, finfo->cmd_buff,
-		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
+	dev_info(&client->dev, "%s: %s\n", __func__, finfo->cmd_buff);
 
 	return;
 }
@@ -3273,8 +3266,7 @@ static void get_x_num(void *device_data)
 		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
 	finfo->cmd_state = OK;
 
-	dev_info(&client->dev, "%s: %s(%d)\n", __func__, finfo->cmd_buff,
-		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
+	dev_info(&client->dev, "%s: %s\n", __func__, finfo->cmd_buff);
 
 	return;
 }
@@ -3293,8 +3285,7 @@ static void get_y_num(void *device_data)
 			strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
 	finfo->cmd_state = OK;
 
-	dev_info(&client->dev, "%s: %s(%d)\n", __func__, finfo->cmd_buff,
-		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
+	dev_info(&client->dev, "%s: %s\n", __func__, finfo->cmd_buff);
 
 	return;
 }
@@ -3316,8 +3307,7 @@ static void not_support_cmd(void *device_data)
 	mutex_unlock(&finfo->cmd_lock);
 	info->factory_info->cmd_state = WAITING;
 
-	dev_info(&client->dev, "%s: \"%s(%d)\"\n", __func__, finfo->cmd_buff,
-		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
+	dev_info(&client->dev, "%s: %s\n", __func__, finfo->cmd_buff);
 
 	return;
 }
@@ -3354,8 +3344,7 @@ static void get_reference(void *device_data)
 		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
 	finfo->cmd_state = OK;
 
-	dev_info(&client->dev, "%s: %s(%d)\n", __func__, finfo->cmd_buff,
-		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
+	dev_info(&client->dev, "%s: %s\n", __func__, finfo->cmd_buff);
 
 	return;
 }
@@ -3401,8 +3390,7 @@ static void run_preference_read(void *device_data)
 		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
 	finfo->cmd_state = OK;
 
-	dev_info(&client->dev, "%s: \"%s\"(%d)\n", __func__, finfo->cmd_buff,
-		strlen(finfo->cmd_buff));
+	dev_info(&client->dev, "%s: %s\n", __func__, finfo->cmd_buff);
 
 	return;
 }
@@ -3440,8 +3428,7 @@ static void get_preference(void *device_data)
 		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
 	finfo->cmd_state = OK;
 
-	dev_info(&client->dev, "%s: %s(%d)\n", __func__, finfo->cmd_buff,
-		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
+	dev_info(&client->dev, "%s: %s\n", __func__, finfo->cmd_buff);
 
 	return;
 }
@@ -3487,9 +3474,7 @@ static void run_delta_read(void *device_data)
 		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
 	finfo->cmd_state = OK;
 
-	dev_info(&client->dev, "%s: \"%s\"(%d)\n", __func__, finfo->cmd_buff,
-		strlen(finfo->cmd_buff));
-
+	dev_info(&client->dev, "%s: %s\n", __func__, finfo->cmd_buff);
 	return;
 }
 
@@ -3526,8 +3511,7 @@ static void get_delta(void *device_data)
 		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
 	info->factory_info->cmd_state = OK;
 
-	dev_info(&client->dev, "%s: %s(%d)\n", __func__, finfo->cmd_buff,
-		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
+	dev_info(&client->dev, "%s: %s\n", __func__, finfo->cmd_buff);
 
 	return;
 }
@@ -3745,8 +3729,7 @@ static void glove_mode(void *device_data)
 	mutex_unlock(&finfo->cmd_lock);
 
 	finfo->cmd_state = WAITING;
-	dev_info(&client->dev, "%s: %s(%d)\n", __func__, finfo->cmd_buff,
-		strnlen(finfo->cmd_buff, sizeof(finfo->cmd_buff)));
+	dev_info(&client->dev, "%s: %s\n", __func__, finfo->cmd_buff);
 
 	return;
 }
