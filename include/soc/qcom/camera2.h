@@ -142,42 +142,10 @@ struct msm_camera_i2c_conf {
 	enum msm_camera_i2c_mux_mode i2c_mux_mode;
 };
 
-enum msm_camera_actuator_name {
-	MSM_ACTUATOR_MAIN_CAM_0,
-	MSM_ACTUATOR_MAIN_CAM_1,
-	MSM_ACTUATOR_MAIN_CAM_2,
-	MSM_ACTUATOR_MAIN_CAM_3,
-	MSM_ACTUATOR_MAIN_CAM_4,
-	MSM_ACTUATOR_MAIN_CAM_5,
-	MSM_ACTUATOR_WEB_CAM_0,
-	MSM_ACTUATOR_WEB_CAM_1,
-	MSM_ACTUATOR_WEB_CAM_2,
-};
-
-struct msm_actuator_info {
-	struct i2c_board_info const *board_info;
-	enum msm_camera_actuator_name cam_name;
-	int bus_id;
-	int vcm_pwd;
-	int vcm_enable;
-};
-enum msm_camera_i2c_mux_mode {
-	MODE_R,
-	MODE_L,
-	MODE_DUAL
-};
-
-struct msm_camera_i2c_conf {
-	uint8_t use_i2c_mux;
-	struct platform_device *mux_dev;
-	enum msm_camera_i2c_mux_mode i2c_mux_mode;
-};
-
 struct msm_camera_sensor_board_info {
 	const char *sensor_name;
 	const char *eeprom_name;
 	const char *actuator_name;
-	const char *ois_name;
 	const char *special_support_sensors[MAX_SPECIAL_SUPPORT_SIZE];
 	int32_t special_support_size;
 	struct msm_camera_slave_info *slave_info;
