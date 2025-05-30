@@ -48,7 +48,7 @@
 #define VFE_PING_FLAG 0xFFFFFFFF
 #define VFE_PONG_FLAG 0x0
 
-#define VFE_MAX_CFG_TIMEOUT 3000
+#define VFE_MAX_CFG_TIMEOUT 5000
 #define VFE_CLK_INFO_MAX 16
 #define STATS_COMP_BIT_MASK 0xFF0000
 
@@ -94,6 +94,13 @@ struct msm_isp_timestamp {
 	struct timeval vt_time;
 	/*Wall clock for userspace event*/
 	struct timeval event_time;
+};
+
+enum msm_vfe_camif_state {
+    CAMIF_STOPPED,
+    CAMIF_ENABLE,
+    CAMIF_DISABLE,
+    CAMIF_STOPPING,
 };
 
 struct msm_vfe_irq_ops {
@@ -386,6 +393,7 @@ struct msm_vfe_axi_shared_data {
 	unsigned int  frame_id[MAX_SESSIONS];
 	uint32_t event_mask;
 	uint32_t burst_len;
+	enum msm_vfe_camif_state camif_state;
 };
 
 struct msm_vfe_stats_hardware_info {
@@ -520,6 +528,12 @@ struct msm_isp_ub_info {
 	uint32_t wm_ub;
 	uint32_t data[MSM_ISP_MAX_WM];
 	uint64_t addr[MSM_ISP_MAX_WM];
+};
+
+struct msm_vfe_hw_init_parms {
+	const char *entries;
+	const char *regs;
+	const char *settings;
 };
 
 struct msm_vbif_cntrs {

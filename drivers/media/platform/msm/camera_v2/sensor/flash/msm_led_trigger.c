@@ -77,6 +77,12 @@ extern int sm5705_fled_torch_on(unsigned char index);
 extern int sm5705_fled_flash_on(unsigned char index);
 #endif
 
+#ifdef CONFIG_FLED_SM5703
+extern int sm5703_fled_led_off(sm_fled_info_t *fled_info);
+extern int sm5703_fled_torch_on(sm_fled_info_t *fled_info);
+extern int sm5703_fled_flash_on(sm_fled_info_t *fled_info);
+#endif
+
 static int32_t msm_led_trigger_get_subdev_id(struct msm_led_flash_ctrl_t *fctrl,
 	void *arg)
 {
@@ -185,22 +191,7 @@ static int32_t msm_led_trigger_config(struct msm_led_flash_ctrl_t *fctrl,
 #endif
 			}else if(flash_id == BACK_CAMERA_B){
 #if defined(CONFIG_FLED_SM5703)
-				if (assistive_light == true) {
-					pr_err("When assistive light, Not control flash\n");
-					return 0;
-				}
-				if (fled_info) {
-					flashlight_set_mode(fled_info->flashlight_dev, FLASHLIGHT_MODE_OFF);
-					flashlight_strobe(fled_info->flashlight_dev, TURN_WAY_GPIO);
-					sm5703_fled_notification(fled_info);
-				}
-
-				gpio_request(fctrl->led_irq_gpio1, NULL);
-				gpio_request(fctrl->led_irq_gpio2, NULL);
-				gpio_direction_output(fctrl->led_irq_gpio1, 0);
-				gpio_direction_output(fctrl->led_irq_gpio2, 0);
-				gpio_free(fctrl->led_irq_gpio1);
-				gpio_free(fctrl->led_irq_gpio2);
+				sm5703_fled_led_off(fled_info);
 #endif
 				break;
 			}
@@ -225,19 +216,7 @@ static int32_t msm_led_trigger_config(struct msm_led_flash_ctrl_t *fctrl,
 #endif
 			}else if(flash_id == BACK_CAMERA_B){
 #if defined(CONFIG_FLED_SM5703)
-				if (assistive_light == true) {
-					pr_err("When assistive light, Not control flash\n");
-					return 0;
-				}
-				if (fled_info) {
-					flashlight_set_mode(fled_info->flashlight_dev, FLASHLIGHT_MODE_TORCH);
-					sm5703_fled_notification(fled_info);
-					flashlight_strobe(fled_info->flashlight_dev, TURN_WAY_GPIO);
-				}
-
-				gpio_request(fctrl->led_irq_gpio1, NULL);
-				gpio_direction_output(fctrl->led_irq_gpio1, 1);
-				gpio_free(fctrl->led_irq_gpio1);
+				sm5703_fled_torch_on(fled_info);
 #endif
 				break;
 			}
@@ -246,19 +225,8 @@ static int32_t msm_led_trigger_config(struct msm_led_flash_ctrl_t *fctrl,
 			pr_err("[CAM_LED]LED STATE HIGH.\n");
 			if(flash_id == BACK_CAMERA_B){
 #if defined(CONFIG_FLED_SM5703)
-				if (assistive_light == true) {
-					pr_err("When assistive light, Not control flash\n");
-					return 0;
-				}
-				if (fled_info) {
-					flashlight_set_mode(fled_info->flashlight_dev, FLASHLIGHT_MODE_FLASH);
-					sm5703_fled_notification(fled_info);
-					flashlight_strobe(fled_info->flashlight_dev, TURN_WAY_GPIO);
-				}
-
-				gpio_request(fctrl->led_irq_gpio2, NULL);
-				gpio_direction_output(fctrl->led_irq_gpio2, 1);
-				gpio_free(fctrl->led_irq_gpio2);
+				sm5703_fled_led_off(fled_info);
+				sm5703_fled_flash_on(fled_info);
 #endif
 				break;
 			}
@@ -268,21 +236,7 @@ static int32_t msm_led_trigger_config(struct msm_led_flash_ctrl_t *fctrl,
 			CDBG("[CAM_LED]LED STATE INIT/RELEASE.\n");
 			if(flash_id == BACK_CAMERA_B){
 #if defined(CONFIG_FLED_SM5703)
-			    if (assistive_light == true) {
-				    pr_err("When assistive light, Not control flash\n");
-				    return 0;
-			    } else if (fled_info) {
-				    flashlight_set_mode(fled_info->flashlight_dev, FLASHLIGHT_MODE_OFF);
-				    flashlight_strobe(fled_info->flashlight_dev, TURN_WAY_GPIO);
-				    sm5703_fled_notification(fled_info);
-			    }
-
-			    gpio_request(fctrl->led_irq_gpio1, NULL);
-			    gpio_request(fctrl->led_irq_gpio2, NULL);
-			    gpio_direction_output(fctrl->led_irq_gpio1, 0);
-			    gpio_direction_output(fctrl->led_irq_gpio2, 0);
-			    gpio_free(fctrl->led_irq_gpio1);
-			    gpio_free(fctrl->led_irq_gpio2);
+				sm5703_fled_led_off(fled_info);
 #endif
 			}
 			else if(flash_id == FRONT_CAMERA_B){
@@ -425,7 +379,6 @@ static int32_t msm_led_trigger_config(struct msm_led_flash_ctrl_t *fctrl,
 		sm5703_fled_notification(fled_info);
 		flashlight_strobe(fled_info->flashlight_dev, TURN_WAY_GPIO);
 		}
-
 #endif
 #if defined(CONFIG_FLED_SM5701)
 		if (assistive_light == true) {
@@ -532,6 +485,7 @@ static int32_t msm_led_trigger_config(struct msm_led_flash_ctrl_t *fctrl,
 			flashlight_set_mode(fled_info->flashlight_dev, FLASHLIGHT_MODE_OFF);
 			flashlight_strobe(fled_info->flashlight_dev, TURN_WAY_GPIO);
 			sm5703_fled_notification(fled_info);
+
 		}
 #endif
 #ifdef CONFIG_FLED_RT5033_EXT_GPIO

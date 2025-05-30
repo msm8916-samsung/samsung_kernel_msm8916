@@ -270,10 +270,6 @@ static int msm_ispif_clk_ahb_enable(struct ispif_device *ispif, int enable)
 {
 	int rc = 0;
 
-	if (ispif->csid_version < CSID_VERSION_V30) {
-		/* Older ISPIF versiond don't need ahb clokc */
-		return 0;
-	}
 	rc = msm_ispif_get_ahb_clk_info(ispif, ispif->pdev,
 		ispif_8974_ahb_clk_info);
 	if (rc < 0) {
@@ -1183,15 +1179,12 @@ static long msm_ispif_subdev_ioctl(struct v4l2_subdev *sd,
 	switch (cmd) {
 	case VIDIOC_MSM_ISPIF_CFG:
 		return msm_ispif_cmd(sd, arg);
-	case MSM_SD_NOTIFY_FREEZE:
-		break;
-	case MSM_SD_SHUTDOWN: {
-		struct ispif_device *ispif =
-			(struct ispif_device *)v4l2_get_subdevdata(sd);
-		if (ispif && ispif->base)
-			msm_ispif_release(ispif);
+	case MSM_SD_NOTIFY_FREEZE: {
+		ispif->ispif_sof_debug = 0;
 		return 0;
 	}
+	case MSM_SD_SHUTDOWN: 
+		return 0;
 	default:
 		pr_err_ratelimited("%s: invalid cmd 0x%x received\n",
 			__func__, cmd);

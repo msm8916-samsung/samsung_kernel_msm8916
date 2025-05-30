@@ -46,6 +46,7 @@ int32_t msm_sensor_flash_native_control(struct msm_sensor_ctrl_t *s_ctrl,
 {
 
     if(system_rev >= 5){
+#if defined(CONFIG_FLED_KTD2692)
 	struct ioctl_native_cmd *cam_info = (struct ioctl_native_cmd *)argp;
 
 	if(s_ctrl->sensordata->slave_info->sensor_id == 0x5e30){
@@ -59,9 +60,10 @@ int32_t msm_sensor_flash_native_control(struct msm_sensor_ctrl_t *s_ctrl,
 			pr_err("%s : KTD Invalid LED value\n", __func__);
 		}
 	}
+#endif
 	return 0;
     }else{
-	#if defined(CONFIG_FLED_LM3632)
+#if defined(CONFIG_FLED_LM3632)
 	struct ioctl_native_cmd *cam_info = (struct ioctl_native_cmd *)argp;
 
 	if(s_ctrl->sensordata->slave_info->sensor_id == 0x5e30){
@@ -75,7 +77,7 @@ int32_t msm_sensor_flash_native_control(struct msm_sensor_ctrl_t *s_ctrl,
 			pr_err("%s : Invalid LED value\n", __func__);
 		}
 	}
-	#endif
+#endif
 	return 0;
 }
 }
@@ -535,6 +537,7 @@ int msm_sensor_power_up(struct msm_sensor_ctrl_t *s_ctrl)
 			__func__, __LINE__, s_ctrl);
 		return -EINVAL;
 	}
+
 
 	power_info = &s_ctrl->sensordata->power_info;
 	sensor_i2c_client = s_ctrl->sensor_i2c_client;
