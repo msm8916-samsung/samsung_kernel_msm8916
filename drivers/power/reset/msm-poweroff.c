@@ -129,13 +129,14 @@ void set_dload_mode(int on)
 #endif
 }
 EXPORT_SYMBOL(set_dload_mode);
-#ifdef CONFIG_QCOM_HARDREBOOT_IMPLEMENTATION
+#if 0 /*  Always WARM Reset */
 static bool get_dload_mode(void)
 {
 	return dload_mode_enabled;
 }
 #endif
 
+#if !defined(CONFIG_SAMSUNG_PRODUCT_SHIP)
 static void enable_emergency_dload_mode(void)
 {
 	int ret;
@@ -160,6 +161,7 @@ static void enable_emergency_dload_mode(void)
 	if (ret)
 		pr_err("Failed to set secure EDLOAD mode: %d\n", ret);
 }
+#endif
 
 static int dload_set(const char *val, struct kernel_param *kp)
 {
@@ -184,17 +186,17 @@ static int dload_set(const char *val, struct kernel_param *kp)
 #else
 #define set_dload_mode(x) do {} while (0)
 
+#if !defined(CONFIG_SAMSUNG_PRODUCT_SHIP)
 static void enable_emergency_dload_mode(void)
 {
 	pr_err("dload mode is not enabled on target\n");
 }
+#endif
 
-#ifdef CONFIG_QCOM_HARDREBOOT_IMPLEMENTATION
 static bool get_dload_mode(void)
 {
 	return false;
 }
-#endif
 #endif
 
 void msm_set_restart_mode(int mode)
@@ -232,10 +234,8 @@ static void msm_restart_prepare(const char *cmd)
 #ifdef CONFIG_QCOM_HARDREBOOT_IMPLEMENTATION
 	bool need_warm_reset = false;
 #endif
-#ifndef CONFIG_QCOM_HARDREBOOT_IMPLEMENTATION
 	unsigned long value;
 	unsigned int warm_reboot_set = 0;
-#endif
 #ifndef CONFIG_SEC_DEBUG
 #ifdef CONFIG_MSM_DLOAD_MODE
 
@@ -283,10 +283,6 @@ Hence Qualcomm's PMIC hard reboot implementation has been taken, but disabled. *
 				(cmd != NULL && cmd[0] != '\0'));
 	}
 
-#ifdef CONFIG_MSM_PRESERVE_MEM
-	need_warm_reset = true;
-#endif
-
 	/* Hard reset the PMIC unless memory contents must be maintained. */
 	if (need_warm_reset) {
 		qpnp_pon_system_pwr_off(PON_POWER_OFF_WARM_RESET);
@@ -325,10 +321,10 @@ Hence Qualcomm's PMIC hard reboot implementation has been taken, but disabled. *
                         if (!ret)
                                 __raw_writel(0x6f656d00 | (code & 0xff),
                                              restart_reason);
+#if !defined(CONFIG_SAMSUNG_PRODUCT_SHIP)
                 } else if (!strncmp(cmd, "edl", 3)) {
                         enable_emergency_dload_mode();
-                } else if (!strncmp(cmd, "download", 8)) {
-                        __raw_writel(0x12345671, restart_reason);
+#endif
                 } else {
                         __raw_writel(0x77665501, restart_reason);
                 }
@@ -346,12 +342,6 @@ Hence Qualcomm's PMIC hard reboot implementation has been taken, but disabled. *
 			__raw_writel(0x77665502, restart_reason);
 		} else if (!strcmp(cmd, "rtc")) {
 			__raw_writel(0x77665503, restart_reason);
-                } else if (!strcmp(cmd, "dm-verity device corrupted")) {
-                        __raw_writel(0x77665508, restart_reason);
-                } else if (!strcmp(cmd, "dm-verity enforcing")) {
-                        __raw_writel(0x77665509, restart_reason);
-                } else if (!strcmp(cmd, "keys clear")) {
-                        __raw_writel(0x7766550a, restart_reason);
 		} else if (!strncmp(cmd, "oem-", 4)) {
 			unsigned long code;
 			int ret;
@@ -392,6 +382,7 @@ Hence Qualcomm's PMIC hard reboot implementation has been taken, but disabled. *
 					&& !kstrtoul(cmd + 5, 0, &value)) {
 			__raw_writel(0xabce0000 | value, restart_reason);
 #endif
+#if !defined(CONFIG_SAMSUNG_PRODUCT_SHIP)
 		} else if (!strncmp(cmd, "edl", 3)) {
 			enable_emergency_dload_mode();
 			warm_reboot_set = 1;
@@ -591,7 +582,6 @@ static int msm_restart_probe(struct platform_device *pdev)
 		if (!emergency_dload_mode_addr)
 			pr_err("unable to map imem EDLOAD mode offset\n");
 	}
-
 #endif
 #ifndef CONFIG_SEC_DEBUG
 	np = of_find_compatible_node(NULL, NULL,
