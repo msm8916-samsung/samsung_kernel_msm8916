@@ -464,8 +464,6 @@ struct msm_camera_sensor_slave_info32 {
 	char sensor_name[32];
 	char eeprom_name[32];
 	char actuator_name[32];
-	char ois_name[32];
-	char flash_name[32];
 	enum msm_sensor_camera_id_t camera_id;
 	uint16_t slave_addr;
 	enum i2c_freq_mode_t i2c_freq_mode;
@@ -475,7 +473,6 @@ struct msm_camera_sensor_slave_info32 {
 	struct msm_sensor_power_setting_array32 power_setting_array;
 	uint8_t  is_init_params_valid;
 	struct msm_sensor_init_params sensor_init_params;
-	enum msm_sensor_output_format_t output_format;
 	uint8_t is_probe_succeed;
 	char subdev_name[32];
 	struct msm_sensor_info_t sensor_info;
