@@ -29,16 +29,6 @@ config FLED_SM5701
 	depends on MFD_SM5701
 	help
 	  A driver for SiliconMitus SM5701 flash LED
-
-config LEDS_KTD2026
-	tristate "LED driver for KTD2026 LED"
-	depends on I2C
-	  help
-	  This option enables support for RGB LED driver
-	  accessed via the I2C bus.
-	  KTD2026 is a fully programmable, constant current
-	  three channel LED driver with flexible control interface.
-
 config LEDS_88PM860X
 	tristate "LED Support for Marvell 88PM860x PMIC"
 	depends on LEDS_CLASS
@@ -341,6 +331,15 @@ config LEDS_MSM_GPIO_FLASH
 	  To compile this driver as a module, choose M here: the module will
 	  be called leds-gpio-flash.
 
+config LEDS_KTD2026
+        tristate "LED driver for KTD2026 LED"
+        depends on I2C
+        help
+          This option enables support for RGB LED driver
+          accessed via the I2C bus.
+          KTD2026 is a fully programmable, constant current
+          three channel LED driver with flexible control interface
+
 config LEDS_WM831X_STATUS
 	tristate "LED support for status LEDs on WM831x PMICs"
 	depends on LEDS_CLASS
@@ -575,6 +574,12 @@ config FLED_SM5703_EXT_GPIO
 	bool "External(or ISP) GPIO"
 	  help
 	  Use GPIO pins to enable/disable torch and flash light.
+	  If unsure, say N.
+
+config CAMERA_ACTIVE_FLASH
+	bool "Rear Camera Active Flash Support"
+	  help
+	  Say yes here to enable support.
 	  If unsure, say N.
 
 config FLED_LM3632
